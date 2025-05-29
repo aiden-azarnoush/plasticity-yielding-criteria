@@ -1,4 +1,3 @@
-```markdown
 # Plasticity Yield Criteria Visualization
 
 A comprehensive MATLAB implementation for visualizing classical yield criteria in plasticity theory, including both principal stress space and deviatoric stress space representations.
@@ -197,4 +196,3 @@ Feel free to fork this repository and submit pull requests for improvements or a
 ---
 
 *These visualizations were developed as part of advanced plasticity coursework and provide intuitive understanding of fundamental yield criteria in materials science and engineering.*
-```
