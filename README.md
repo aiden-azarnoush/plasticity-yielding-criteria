@@ -61,18 +61,9 @@ Yield stress σ_y (any units, e.g. 250) (press Enter for a schematic plot):
 The graphical interface has the same three choices as radio buttons, one
 box for the constant, and two buttons:
 
-```
- Criterion                     View
-  ( ) Tresca                    (•) 3D principal stress space
-  ( ) von Mises                 ( ) 2D plane stress (σ₃ = 0)
-  ( ) Drucker-Prager            ( ) π-plane (deviatoric stresses)
-  (•) Tresca + von Mises
-
- Constant  (σ_y, or η for Drucker-Prager)
-  [        ]   leave empty for a schematic plot (no tick numbers)
-
-  [   Plot   ]   [ Save as image… ]
-```
+<p align="center">
+<img src="figures/gui.png" width="520" alt="The graphical interface: criterion and view radio buttons, a box for the constant, Plot and Save buttons">
+</p>
 
 > [!WARNING]
 > The graphical interface uses `tkinter`, which ships with the standard
