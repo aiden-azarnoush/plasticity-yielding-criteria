@@ -1,198 +1,183 @@
-# Plasticity Yield Criteria Visualization
+# Plasticity Yield Criteria Visualizer
 
-A comprehensive MATLAB implementation for visualizing classical yield criteria in plasticity theory, including both principal stress space and deviatoric stress space representations.
+Interactive Python visualizations of the classical yield criteria in
+plasticity — **Tresca**, **von Mises**, and **Drucker-Prager** — in 3D
+principal stress space, in the deviatoric π-plane, and in plane stress.
+Plot any criterion alone or any combination together. One file, a
+graphical interface, a question-and-answer mode, and command-line flags;
+every constant has a sensible default, so you can just press Enter and
+look at the shapes.
 
-## Table of Contents
+<p align="center">
+<img src="figures/rotating.gif" width="420" alt="Tresca hexagonal prism inside the von Mises cylinder, rotating">
+</p>
 
-- [Overview](#overview)
-- [Implemented Yield Criteria](#implemented-yield-criteria)
-  - [Tresca Yield Criterion](#1-tresca-yield-criterion)
-  - [von Mises Yield Criterion](#2-von-mises-yield-criterion)
-  - [Drucker-Prager Yield Criterion](#3-drucker-prager-yield-criterion)
-  - [Combined Visualizations](#4-combined-tresca-and-von-mises)
-  - [Deviatoric Representations](#5-deviatoric-representations)
-- [Theory Background](#theory-background)
-- [Usage](#usage)
-- [Output](#output)
-- [Mathematical Significance](#mathematical-significance)
-- [File Structure](#file-structure)
-- [Author](#author)
-- [License](#license)
-- [Contributing](#contributing)
-- [References](#references)
-- [Dedication](#dedication)
+## Run it
 
-## Overview
+Download or clone the repository, install the two dependencies once, and
+run the one file:
 
-This repository contains MATLAB scripts that generate 2D and 3D visualizations of fundamental yield criteria used in plasticity and materials engineering. These criteria define the conditions under which materials transition from elastic to plastic behavior.
+```bash
+pip install numpy matplotlib
+python yield_criteria.py
+```
 
-> [!NOTE]  
-> All scripts are self-contained and require only base MATLAB installation. No additional toolboxes are needed.
-
-## Implemented Yield Criteria
-
-### 1. Tresca Yield Criterion
-- **File**: `tresca.m`
-- **Description**: Maximum shear stress theory
-- **Mathematical Form**: τ_max = σ_y/2
-- **Visualization**: Hexagonal prism in principal stress space
-
-### 2. von Mises Yield Criterion  
-- **File**: `von_mises.m`
-- **Description**: Maximum distortion energy theory
-- **Mathematical Form**: √[(σ₁-σ₂)² + (σ₂-σ₃)² + (σ₃-σ₁)²] = √2·σ_y
-- **Visualization**: Circular cylinder in principal stress space
-
-### 3. Drucker-Prager Yield Criterion
-- **File**: `drucker.m` 
-- **Description**: Pressure-dependent yield criterion for granular materials
-- **Mathematical Form**: √J₂ + α·I₁ = k
-- **Visualization**: Cone in principal stress space
-- **Parameters**: η = 0.5 or η = 1.0
+That opens the **graphical interface**: tick the criteria you want, pick a
+view, press **Plot**.
 
 > [!TIP]
-> For the Drucker-Prager criterion, try both η values (0.5 and 1.0) to see how the cone geometry changes with different material parameters.
+> 3D plots open in a window you can **drag with the mouse to rotate**, and
+> scroll to zoom. Every input box already holds a default value, so the
+> first plot is one click away.
 
-### 4. Combined Tresca and von Mises
-- **File**: `tresca_and_von_mises.m`
-- **Description**: Side-by-side comparison of both criteria
-- **Visualization**: Hexagonal prism (Tresca) inscribed in circular cylinder (von Mises)
+Other ways to run the same thing:
 
-### 5. Deviatoric Representations
+```bash
+python yield_criteria.py --cli                                 # asks you the questions one by one
+python yield_criteria.py --criterion mises --view 3d            # straight to a plot
+python yield_criteria.py --criterion tresca mises --view plane  # two criteria together
+python yield_criteria.py --criterion all --view 3d              # all three together
+python yield_criteria.py --criterion drucker --eta 0.5          # Drucker-Prager cone, eta = 0.5
+python yield_criteria.py --criterion both --view deviatoric --sy 250 --save pi_plane.png
+```
 
-#### Deviatoric Tresca
-- **File**: `deviatoric_tresca.m`
-- **Description**: Tresca criterion in π-plane (deviatoric stress space)
-- **Visualization**: Regular hexagon with principal stress directions
+| Option | Meaning | Default |
+|---|---|---|
+| `--criterion` | one or more of `tresca` `mises` `drucker`; shortcuts `both` (Tresca + von Mises) and `all` | GUI opens |
+| `--view` | `3d`, `deviatoric` (π-plane), or `plane` (σ₃ = 0) | `3d` |
+| `--sy` | yield stress for Tresca / von Mises (any units) | 1 |
+| `--cbar`, `--eta` | Drucker-Prager constant c̄ and friction parameter η | 1, 1 |
+| `--save FILE` | write a PNG/PDF instead of opening a window | show |
 
-#### Deviatoric von Mises
-- **File**: `deviatoric_von.m`
-- **Description**: von Mises criterion in π-plane (deviatoric stress space)  
-- **Visualization**: Circle with principal stress directions
+> [!NOTE]
+> Stresses are in whatever units you enter; with the default σ_y = 1 the
+> plots are normalized, which is usually what you want for seeing the
+> shapes. Enter a real yield stress (say 250 for MPa) to get real axes.
 
-> [!IMPORTANT]  
-> The deviatoric representations show yield surfaces in the π-plane, which is perpendicular to the hydrostatic axis and represents pure deviatoric stress states.
+## What you get
 
-## Theory Background
+### Principal stress space (3D, rotatable)
 
-### Principal Stress Space
-The yield surfaces are plotted in a 3D coordinate system where the axes represent the three principal stresses (σ₁, σ₂, σ₃). Key features:
+Each surface is drawn around the hydrostatic axis σ₁ = σ₂ = σ₃ (dashed
+red). Tresca is a hexagonal prism, von Mises a circular cylinder that
+circumscribes it, and Drucker-Prager a cone whose opening angle is set by η.
 
-- **Hydrostatic Line**: The line σ₁ = σ₂ = σ₃ (shown in red) represents pure hydrostatic stress states
-- **Rotation**: Surfaces are rotated 54.7356° around the [-1,1,0] axis to align with the standard orientation
-- **Tresca**: Forms a hexagonal prism with flat faces perpendicular to the deviatoric plane
-- **von Mises**: Forms a circular cylinder, always circumscribing the Tresca hexagon
+| Tresca | von Mises | Tresca + von Mises |
+|---|---|---|
+| ![tresca](figures/tresca_3d.png) | ![mises](figures/von_mises_3d.png) | ![both](figures/tresca_von_mises_3d.png) |
 
-### Deviatoric Stress Space (π-plane)
-The π-plane is perpendicular to the hydrostatic line and represents pure deviatoric stress states:
+| Drucker-Prager, η = 0.5 | Drucker-Prager, η = 1 | All three |
+|---|---|---|
+| ![dp05](figures/drucker_eta0.5.png) | ![dp1](figures/drucker_eta1.png) | ![all3d](figures/all_three_3d.png) |
 
-- **Coordinate System**: Uses a 2D projection where principal stress directions are clearly marked
-- **Tresca**: Appears as a regular hexagon
-- **von Mises**: Appears as a circle
-- **Scaling Factor**: r = √(2/3) × σ_y ensures proper geometric relationships
+> [!IMPORTANT]
+> The von Mises cylinder always **circumscribes** the Tresca prism; they
+> touch only along the six uniaxial-stress edges. That is why Tresca is
+> the conservative choice: it predicts yield at or before von Mises for
+> every stress state.
 
-### Drucker-Prager Criterion
-Extended yield criterion for pressure-sensitive materials:
-- **Cone Shape**: Reflects the material's dependence on hydrostatic pressure
-- **Parameters**: Different η values (0.5, 1.0) provide different cone geometries
-- **Applications**: Particularly useful for soils, concrete, and granular materials
+### Deviatoric π-plane
 
-## Usage
+The plane perpendicular to the hydrostatic axis, with the projected σ₁,
+σ₂, σ₃ directions 120° apart. Tresca is a regular hexagon inscribed in the
+von Mises circle of radius ρ = √(2/3)·σ_y; they touch at the six uniaxial
+directions. For Drucker-Prager the section is a circle whose radius grows
+with hydrostatic compression.
 
-### Requirements
-- MATLAB (tested on recent versions)
-- No additional toolboxes required
+| Tresca + von Mises | Drucker-Prager at several ξ | All three (ξ = 0 section) |
+|---|---|---|
+| ![dev](figures/deviatoric.png) | ![dpdev](figures/drucker_deviatoric.png) | ![all3dev](figures/all_three_deviatoric.png) |
 
-> [!WARNING]  
-> Make sure to clear any existing variables and figures before running scripts to avoid conflicts.
+> [!NOTE]
+> For Tresca and von Mises the π-plane section is the **same at every
+> hydrostatic pressure** — that is the geometric meaning of "pressure
+> independent". Drucker-Prager's section changes with pressure, so when it
+> is plotted alone the tool draws it at three levels ξ, and when it is
+> combined with the others it shows the ξ = 0 section.
 
-### Running the Scripts
+### Plane stress (σ₃ = 0)
 
-1. **Individual Yield Criteria**:
-   ```matlab
-   run('tresca.m')          % 3D Tresca hexagonal prism
-   run('von_mises.m')       % 3D von Mises cylinder
-   run('drucker.m')         % 3D Drucker-Prager cone
-   ```
+The classic textbook picture: the Tresca hexagon inside the von Mises
+ellipse in the σ₁–σ₂ plane — and, with Drucker-Prager added, the
+pressure-sensitive loop that is tight in tension and open in compression.
 
-2. **Comparison**:
-   ```matlab
-   run('tresca_and_von_mises.m')  % Both criteria overlaid
-   ```
+| Tresca + von Mises | All three |
+|---|---|
+| ![plane](figures/plane_stress.png) | ![all3plane](figures/all_three_plane.png) |
 
-3. **Deviatoric Representations**:
-   ```matlab
-   run('deviatoric_tresca.m')     % 2D hexagon in π-plane
-   run('deviatoric_von.m')        % 2D circle in π-plane
-   ```
+## The criteria
 
-### Customization
+**Tresca** (maximum shear stress): yield when
+$\tau_{max} = \tfrac{1}{2}\max|\sigma_i - \sigma_j| = \sigma_y / 2$.
 
-Key parameters that can be modified:
+**von Mises** (distortion energy):
 
-- **Yield Stress**: Change the variable `y` or `Y` in each script
-- **Drucker-Prager Parameter**: Modify `eta` (0.5 or 1.0) in `drucker.m`
-- **Visualization Range**: Adjust `axis` limits for better viewing
-- **Colors and Styling**: Modify `FaceColor`, `LineWidth`, and other graphics properties
+```math
+\sqrt{\tfrac{1}{2}\left[(\sigma_1-\sigma_2)^2 + (\sigma_2-\sigma_3)^2 + (\sigma_3-\sigma_1)^2\right]} = \sigma_y
+\qquad\Longleftrightarrow\qquad \sqrt{3 J_2} = \sigma_y
+```
+
+**Drucker-Prager** (pressure-sensitive, for soils, rock, concrete,
+granular media):
+
+```math
+\sqrt{J_2} = k - \alpha\, I_1
+```
+
+The tool parameterizes the cone by a cohesion-like constant $\bar c$ and a
+friction parameter $\eta$: the deviatoric radius is $\bar c$ at $I_1 = 0$
+and the apex sits on the hydrostatic axis at $\xi = \sqrt{3}\,\bar c/\eta$
+(hydrostatic tension, tension-positive convention), which corresponds to
+$k = \bar c/\sqrt{2}$ and $\alpha = \eta/(3\sqrt{2})$.
+
+> [!TIP]
+> Try Drucker-Prager with η = 0.5 and then η = 1 to watch the cone open and
+> close; the apex moves from ξ = 3.46 c̄ to ξ = 1.73 c̄.
 
 > [!CAUTION]
-> When modifying yield stress values, ensure they remain positive to maintain physical meaning of the yield surfaces.
+> Keep σ_y, c̄, and η positive. Negative or zero values have no physical
+> meaning here and the surfaces will not be drawn correctly.
 
-## Output
+### Geometry used by the code
 
-Each script generates high-quality 3D or 2D plots with:
-- Proper axis labels with mathematical notation
-- Grid lines for reference
-- Optimal viewing angles
-- Professional formatting suitable for presentations and publications
+Points in principal stress space are written in cylindrical coordinates
+about the hydrostatic axis $\mathbf n = (1,1,1)/\sqrt3$: a hydrostatic
+coordinate $\xi = I_1/\sqrt3$ and a deviatoric radius $\rho = \sqrt{2J_2}$
+with angle $\theta$ in the π-plane. Each criterion is just a rule
+$\rho(\theta, \xi)$ — a constant for von Mises, a hexagon $\rho(\theta)$
+for Tresca, a line $\rho(\xi)$ for Drucker-Prager. That is the whole file.
 
-## Mathematical Significance
-
-- **Tresca vs von Mises**: von Mises criterion is more accurate for ductile metals, while Tresca provides a conservative estimate
-- **Geometric Relationship**: von Mises surface always circumscribes Tresca surface
-- **Deviatoric Analysis**: The π-plane representations show that yielding is independent of hydrostatic pressure for these criteria
-- **Engineering Applications**: These visualizations help in understanding material behavior under complex stress states
-
-> [!TIP]
-> Use the combined visualization (`tresca_and_von_mises.m`) to clearly see how the von Mises cylinder always contains the Tresca hexagon, demonstrating the conservative nature of the Tresca criterion.
-
-## File Structure
+## Files
 
 ```
-├── tresca.m                    # 3D Tresca yield surface
-├── von_mises.m                 # 3D von Mises yield surface  
-├── drucker.m                   # 3D Drucker-Prager yield surface
-├── tresca_and_von_mises.m      # Combined 3D visualization
-├── deviatoric_tresca.m         # 2D Tresca in π-plane
-├── deviatoric_von.m            # 2D von Mises in π-plane
-└── README.md                   # This file
+yield_criteria.py   the tool (GUI + CLI + flags) — no other code needed
+figures/            the images above
 ```
+
+> [!WARNING]
+> The graphical interface uses `tkinter`, which ships with the standard
+> Python installers on macOS and Windows. On some Linux distributions it is
+> a separate package (`sudo apt install python3-tk`). If it is missing, the
+> tool falls back to the question mode automatically.
 
 ## Author
 
-**Aiden Azarnoush**  
-Email: a.m.azarnoush@gmail.com
+**Aiden Azarnoush**
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Contributing
-
-Feel free to fork this repository and submit pull requests for improvements or additional yield criteria implementations.
+MIT — see [LICENSE](LICENSE).
 
 ## References
 
 - Hill, R. (1998). *The Mathematical Theory of Plasticity*
-- Lubliner, J. (1990). *Plasticity Theory*  
+- Lubliner, J. (1990). *Plasticity Theory*
 - Chen, W.F. & Han, D.J. (1988). *Plasticity for Structural Engineers*
 
 ---
 
 ## Dedication
 
-*This work is dedicated to my beloved mother, **Simin Nematpour**, who passed away. I love her and miss her deeply. Her memory continues to inspire my academic pursuits and passion for engineering.*
-
----
-
-*These visualizations were developed as part of advanced plasticity coursework and provide intuitive understanding of fundamental yield criteria in materials science and engineering.*
+*This work is dedicated to my beloved mother, **Simin Nematpour**, who
+passed away. I love her and miss her deeply. Her memory continues to
+inspire my academic pursuits and passion for engineering.*
