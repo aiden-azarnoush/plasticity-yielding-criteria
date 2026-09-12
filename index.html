@@ -124,8 +124,13 @@ function draw() {
     if (crit === 'mises' || crit === 'both') traces.push(prismSurface(() => rhoMises(sy), len, BLUE, 'von Mises (cylinder)'));
     if (crit === 'drucker') traces.push(coneSurface(eta, c, len));
     traces.push({type: 'scatter3d', mode: 'lines', x: [-lim, lim], y: [-lim, lim], z: [-lim, lim], line: {color: 'red', dash: 'dash', width: 4}, name: 'hydrostatic axis σ₁ = σ₂ = σ₃'});
-    const ax = t => ({title: t, range: [-lim, lim], ...tickHide});
-    layout = {scene: {xaxis: ax('σ₁'), yaxis: ax('σ₂'), zaxis: ax('σ₃'), aspectmode: 'cube', camera: {eye: {x: 1.5, y: 1.3, z: 1.0}}},
+    // the three principal axes drawn through the origin, labelled at their tips
+    const axes = [['σ₁', [lim, 0, 0]], ['σ₂', [0, lim, 0]], ['σ₃', [0, 0, lim]]];
+    for (const [name, tip] of axes) traces.push({type: 'scatter3d', mode: 'lines+text', x: [-tip[0], tip[0] * 1.08], y: [-tip[1], tip[1] * 1.08], z: [-tip[2], tip[2] * 1.08],
+      text: ['', name], textposition: 'middle center', textfont: {size: 18, color: '#1c2733'}, line: {color: '#1c2733', width: 3}, showlegend: false, hoverinfo: 'none'});
+    const ax = t => ({title: t, range: [-1.15 * lim, 1.15 * lim], ...tickHide});
+    layout = {scene: {xaxis: ax('σ₁'), yaxis: ax('σ₂'), zaxis: ax('σ₃'), aspectmode: 'cube',
+                      camera: {eye: {x: 1.7, y: 1.7, z: 1.0}, up: {x: 0, y: 0, z: 1}, projection: {type: 'orthographic'}}},
               margin: {l: 0, r: 0, t: 10, b: 0}, legend: {orientation: 'h', y: 0.02, x: 0}};
   } else if (view === '2d') {
     let lim = 1.5 * sy;
