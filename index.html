@@ -153,9 +153,11 @@ function draw() {
               margin: {l: 50, r: 20, t: 30, b: 50}, legend: {orientation: 'h', y: -0.12, x: 0}, title: {text: 'Plane stress (σ₃ = 0)', font: {size: 14}}};
   } else {
     const r = crit === 'drucker' ? 1.6 * c : 1.45 * rhoMises(sy);
-    for (let k = 0; k < 3; k++) { const a = 2 * Math.PI * k / 3;
+    // orientation: sigma2 straight up, sigma1 and sigma3 120 degrees to either side
+    const OFF = -Math.PI / 6;                       // rotates the sigma1 direction from 0 to -30 degrees
+    for (let k = 0; k < 3; k++) { const a = 2 * Math.PI * k / 3 + OFF;
       traces.push({x: [0, r * Math.cos(a)], y: [0, r * Math.sin(a)], mode: 'lines+text', line: {color: '#555', width: 1.5}, text: ['', ['σ₁', 'σ₂', 'σ₃'][k]], textposition: 'top center', textfont: {size: 16}, showlegend: false, hoverinfo: 'none'}); }
-    const polar = (rhoFn, color, name, dash) => { const xs = [], ys = []; for (let i = 0; i <= 720; i++) { const th = 2 * Math.PI * i / 720, rho = rhoFn(th); xs.push(rho * Math.cos(th)); ys.push(rho * Math.sin(th)); }
+    const polar = (rhoFn, color, name, dash) => { const xs = [], ys = []; for (let i = 0; i <= 720; i++) { const th = 2 * Math.PI * i / 720, rho = rhoFn(th); xs.push(rho * Math.cos(th + OFF)); ys.push(rho * Math.sin(th + OFF)); }
       return {x: xs, y: ys, mode: 'lines', line: {color, width: 3, dash: dash || 'solid'}, name}; };
     if (crit === 'tresca' || crit === 'both') traces.push(polar(th => rhoTresca(th, sy), GREEN, 'Tresca hexagon'));
     if (crit === 'mises' || crit === 'both') traces.push(polar(() => rhoMises(sy), BLUE, 'von Mises circle, ρ = √(2/3) σy'));
