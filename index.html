@@ -128,8 +128,11 @@ function draw() {
     const axes = [['σ₁', [lim, 0, 0]], ['σ₂', [0, lim, 0]], ['σ₃', [0, 0, lim]]];
     for (const [name, tip] of axes) traces.push({type: 'scatter3d', mode: 'lines+text', x: [-tip[0], tip[0] * 1.08], y: [-tip[1], tip[1] * 1.08], z: [-tip[2], tip[2] * 1.08],
       text: ['', name], textposition: 'middle center', textfont: {size: 18, color: '#1c2733'}, line: {color: '#1c2733', width: 3}, showlegend: false, hoverinfo: 'none'});
-    const ax = t => ({title: t, range: [-1.15 * lim, 1.15 * lim], ...tickHide});
-    layout = {scene: {xaxis: ax('σ₁'), yaxis: ax('σ₂'), zaxis: ax('σ₃'), aspectmode: 'cube',
+    // no axis titles on the box (the labelled axes through the origin replace them);
+    // schematic mode also hides the box, grid and ticks for a clean figure
+    const ax = () => schem ? {title: '', range: [-1.15 * lim, 1.15 * lim], showticklabels: false, showgrid: false, zeroline: false, showbackground: false, showline: false, ticks: ''}
+                           : {title: '', range: [-1.15 * lim, 1.15 * lim]};
+    layout = {scene: {xaxis: ax(), yaxis: ax(), zaxis: ax(), aspectmode: 'cube',
                       camera: {eye: {x: 1.7, y: 1.7, z: 1.0}, up: {x: 0, y: 0, z: 1}, projection: {type: 'orthographic'}}},
               margin: {l: 0, r: 0, t: 10, b: 0}, legend: {orientation: 'h', y: 0.02, x: 0}};
   } else if (view === '2d') {
