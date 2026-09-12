@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yield Criteria Visualizer</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+  :root { --ink:#1c2733; --muted:#66768a; --blue:#1f5fbf; --orange:#d3541f; --green:#2a9d5c; --bg:#f6f8fb; }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:22px 14px; font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif; color:var(--ink); background:var(--bg); }
+  h1 { text-align:center; font-size:1.5rem; margin:0 0 4px; }
+  h2 { font-size:1.02rem; margin:0 0 8px; }
+  .sub { text-align:center; color:var(--muted); font-size:.92rem; margin-bottom:18px; }
+  .wrap { max-width:1180px; margin:0 auto; display:grid; grid-template-columns:320px 1fr; gap:18px; }
+  .card { background:#fff; border-radius:12px; padding:16px 18px; box-shadow:0 2px 12px rgba(0,0,0,.07); }
+  .opt { display:block; padding:6px 4px; font-size:.95rem; cursor:pointer; }
+  .opt input { margin-right:8px; }
+  table.in { width:100%; border-collapse:collapse; margin-top:6px; }
+  table.in td { padding:6px 4px; border-bottom:1px solid #e6ebf2; font-size:.95rem; }
+  table.in input { width:100%; padding:6px 8px; font-size:.98rem; border:1px solid #c9d4e0; border-radius:6px; }
+  table.in td:first-child { width:58%; }
+  .note { color:var(--muted); font-size:.82rem; line-height:1.45; margin-top:10px; }
+  #plot { width:100%; height:640px; }
+  .eq { font-family:"Times New Roman",serif; font-style:italic; color:#33445a; margin:8px 0; font-size:1.02rem; }
+  footer { max-width:1180px; margin:22px auto 0; text-align:center; color:#66768a; font-size:.85rem; line-height:1.9; }
+  footer a { color:#1f5fbf; text-decoration:none; margin:0 8px; white-space:nowrap; }
+  footer a:hover { text-decoration:underline; }
+  footer svg { width:16px; height:16px; vertical-align:-3px; margin-right:4px; }
+  @media (max-width:900px) { .wrap { grid-template-columns:1fr; } #plot { height:520px; } }
+</style>
+</head>
+<body>
+<h1>Yield Criteria Visualizer</h1>
+<div class="sub">Tresca, von Mises, and Drucker-Prager yield surfaces in principal stress space, plane stress, and the deviatoric π-plane. Drag the 3D view to rotate it.</div>
+
+<div class="wrap">
+  <div class="card">
+    <h2>1. Criterion</h2>
+    <label class="opt"><input type="radio" name="crit" value="tresca"> Tresca</label>
+    <label class="opt"><input type="radio" name="crit" value="mises"> von Mises</label>
+    <label class="opt"><input type="radio" name="crit" value="both" checked> Tresca + von Mises together</label>
+    <label class="opt"><input type="radio" name="crit" value="drucker"> Drucker-Prager</label>
+
+    <h2 style="margin-top:14px">2. View</h2>
+    <label class="opt"><input type="radio" name="view" value="3d" checked> 3D principal stress space (σ₁, σ₂, σ₃)</label>
+    <label class="opt"><input type="radio" name="view" value="2d"> 2D plane stress (σ₃ = 0)</label>
+    <label class="opt"><input type="radio" name="view" value="pi"> π-plane (deviatoric stresses)</label>
+
+    <h2 style="margin-top:14px">3. Constants</h2>
+    <table class="in">
+      <tr id="rowSy"><td>Yield stress σ<sub>y</sub></td><td><input id="sy" type="number" step="any" value="1" min="0"></td></tr>
+      <tr id="rowEta"><td>Friction parameter η (Drucker-Prager)</td><td><input id="eta" type="number" step="any" value="1" min="0"></td></tr>
+      <tr id="rowC"><td>Cohesion constant c̄ (Drucker-Prager)</td><td><input id="cbar" type="number" step="any" value="1" min="0"></td></tr>
+    </table>
+    <label class="opt" style="margin-top:8px"><input type="checkbox" id="schem" checked> Schematic: hide the axis numbers (for figures in reports)</label>
+    <div class="note" id="eqs"></div>
+  </div>
+
+  <div class="card"><div id="plot"></div></div>
+</div>
+
+<footer>
+  Written by <b>Aiden Azarnoush</b><br>
+  <a href="https://github.com/aiden-azarnoush/plasticity-yielding-criteria"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 3 1 8l4.5 5 1-1L2.9 8l3.6-4zM10.5 3l-1 1L13.1 8l-3.6 4 1 1L15 8z"/></svg>source on GitHub</a>
+  <a href="https://github.com/aiden-azarnoush"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 1.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zM8 4a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zm0 6c-2 0-3.5 1-3.5 2v.3A5.5 5.5 0 0 0 8 13.5a5.5 5.5 0 0 0 3.5-1.2V12c0-1-1.5-2-3.5-2z"/></svg>all my repositories</a>
+  <a href="https://aiden-azarnoush.github.io"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm4.9 6h-2.1a11 11 0 0 0-.9-3.6A5.5 5.5 0 0 1 12.9 7zM8 2.5c.7.8 1.4 2.3 1.6 4.5H6.4c.2-2.2.9-3.7 1.6-4.5zM3.1 7a5.5 5.5 0 0 1 3-3.6c-.4 1-.7 2.3-.9 3.6H3.1zm0 2h2.1c.2 1.3.5 2.6.9 3.6A5.5 5.5 0 0 1 3.1 9zM8 13.5c-.7-.8-1.4-2.3-1.6-4.5h3.2c-.2 2.2-.9 3.7-1.6 4.5zm1.9-.9c.4-1 .7-2.3.9-3.6h2.1a5.5 5.5 0 0 1-3 3.6z"/></svg>aiden-azarnoush.github.io</a>
+  <div style="margin-top:6px">Found this useful? <a href="https://paypal.me/azarnoush">☕ Buy me a coffee</a> &nbsp;
+    <a href="https://paypal.me/azarnoush/3">$3</a> · <a href="https://paypal.me/azarnoush/5">$5</a> · <a href="https://paypal.me/azarnoush">other</a></div>
+</footer>
+
+<script>
+// ---------------------------------------------------------------- geometry
+// Cylindrical coordinates about the hydrostatic axis n = (1,1,1)/sqrt3, with
+// (e1, e2) spanning the pi-plane; e1 is the projection of the sigma1 axis.
+const S3 = Math.sqrt(3), S6 = Math.sqrt(6), S2 = Math.sqrt(2);
+const N_HYD = [1 / S3, 1 / S3, 1 / S3], E1 = [2 / S6, -1 / S6, -1 / S6], E2 = [0, 1 / S2, -1 / S2];
+const GREEN = '#2a9d5c', BLUE = '#1f5fbf', ORANGE = '#d3541f';
+const toPrincipal = (rho, th, xi) => [0, 1, 2].map(k => rho * Math.cos(th) * E1[k] + rho * Math.sin(th) * E2[k] + xi * N_HYD[k]);
+const rhoMises = sy => Math.sqrt(2 / 3) * sy;
+function rhoTresca(th, sy) { const t = ((th % (Math.PI / 3)) + Math.PI / 3) % (Math.PI / 3) - Math.PI / 6; return rhoMises(sy) * Math.cos(Math.PI / 6) / Math.cos(t); }
+const rhoDrucker = (xi, eta, c) => Math.max(0, c * (1 - xi / (S3 * c / eta)));
+
+const $ = id => document.getElementById(id);
+const val = name => document.querySelector(`input[name=${name}]:checked`).value;
+
+function prismSurface(rhoFn, len, color, name, nth = 241) {
+  const x = [], y = [], z = [];
+  for (const xi of [-len, len]) {
+    const rx = [], ry = [], rz = [];
+    for (let i = 0; i < nth; i++) { const th = 2 * Math.PI * i / (nth - 1); const p = toPrincipal(rhoFn(th), th, xi); rx.push(p[0]); ry.push(p[1]); rz.push(p[2]); }
+    x.push(rx); y.push(ry); z.push(rz);
+  }
+  return {type: 'surface', x, y, z, opacity: .55, showscale: false, colorscale: [[0, color], [1, color]], name, hoverinfo: 'name', showlegend: true};
+}
+function coneSurface(eta, c, len) {
+  const xiApex = S3 * c / eta, x = [], y = [], z = [], nth = 181, nxi = 40;
+  for (let j = 0; j < nxi; j++) {
+    const xi = -len + (xiApex + len) * j / (nxi - 1); const rx = [], ry = [], rz = [];
+    for (let i = 0; i < nth; i++) { const th = 2 * Math.PI * i / (nth - 1); const p = toPrincipal(rhoDrucker(xi, eta, c), th, xi); rx.push(p[0]); ry.push(p[1]); rz.push(p[2]); }
+    x.push(rx); y.push(ry); z.push(rz);
+  }
+  return {type: 'surface', x, y, z, opacity: .6, showscale: false, colorscale: [[0, ORANGE], [1, ORANGE]], name: `Drucker-Prager cone, η = ${eta}`, hoverinfo: 'name', showlegend: true};
+}
+
+function draw() {
+  const crit = val('crit'), view = val('view'), schem = $('schem').checked;
+  const sy = +$('sy').value || 1, eta = +$('eta').value || 1, c = +$('cbar').value || 1;
+  $('rowSy').style.display = crit === 'drucker' ? 'none' : '';
+  $('rowEta').style.display = $('rowC').style.display = crit === 'drucker' ? '' : 'none';
+  $('eqs').innerHTML = {
+    tresca: '<div class="eq">max|σ<sub>i</sub> − σ<sub>j</sub>| = σ<sub>y</sub></div>hexagonal prism along the hydrostatic axis',
+    mises: '<div class="eq">√(3 J₂) = σ<sub>y</sub></div>circular cylinder along the hydrostatic axis',
+    both: '<div class="eq">max|σ<sub>i</sub> − σ<sub>j</sub>| = σ<sub>y</sub> &nbsp;and&nbsp; √(3 J₂) = σ<sub>y</sub></div>the von Mises cylinder circumscribes the Tresca prism; they touch on the six uniaxial-stress lines',
+    drucker: '<div class="eq">√J₂ = k − α I₁, &nbsp; k = c̄/√2, &nbsp; α = η/(3√2)</div>pressure-sensitive cone with its apex on the hydrostatic axis at ξ = √3 c̄/η',
+  }[crit];
+  const tickHide = schem ? {showticklabels: false} : {};
+  const traces = []; let layout;
+
+  if (view === '3d') {
+    const len = crit === 'drucker' ? 2.6 * c : 2.2 * sy;
+    const lim = crit === 'drucker' ? 2.6 * c : 2.4 * sy;
+    if (crit === 'tresca' || crit === 'both') traces.push(prismSurface(th => rhoTresca(th, sy), len, GREEN, 'Tresca (hexagonal prism)'));
+    if (crit === 'mises' || crit === 'both') traces.push(prismSurface(() => rhoMises(sy), len, BLUE, 'von Mises (cylinder)'));
+    if (crit === 'drucker') traces.push(coneSurface(eta, c, len));
+    traces.push({type: 'scatter3d', mode: 'lines', x: [-lim, lim], y: [-lim, lim], z: [-lim, lim], line: {color: 'red', dash: 'dash', width: 4}, name: 'hydrostatic axis σ₁ = σ₂ = σ₃'});
+    const ax = t => ({title: t, range: [-lim, lim], ...tickHide});
+    layout = {scene: {xaxis: ax('σ₁'), yaxis: ax('σ₂'), zaxis: ax('σ₃'), aspectmode: 'cube', camera: {eye: {x: 1.5, y: 1.3, z: 1.0}}},
+              margin: {l: 0, r: 0, t: 10, b: 0}, legend: {orientation: 'h', y: 0.02, x: 0}};
+  } else if (view === '2d') {
+    let lim = 1.5 * sy;
+    if (crit === 'tresca' || crit === 'both') traces.push({x: [1, 1, 0, -1, -1, 0, 1].map(v => v * sy), y: [0, 1, 1, 0, -1, -1, 0].map(v => v * sy), mode: 'lines', line: {color: GREEN, width: 3}, name: 'Tresca hexagon'});
+    if (crit === 'mises' || crit === 'both') {
+      const xs = [], ys = []; for (let i = 0; i <= 400; i++) { const t = 2 * Math.PI * i / 400, a = S2 * sy * Math.cos(t), b = Math.sqrt(2 / 3) * sy * Math.sin(t), cc = Math.cos(Math.PI / 4); xs.push(cc * (a - b)); ys.push(cc * (a + b)); }
+      traces.push({x: xs, y: ys, mode: 'lines', line: {color: BLUE, width: 3}, name: 'von Mises ellipse'});
+    }
+    if (crit === 'drucker') {
+      // sqrt(J2) + alpha I1 = k with sigma3 = 0, in polar form: R = k / (g(phi) + alpha (cos phi + sin phi))
+      const k = c / S2, alpha = eta / (3 * S2); const xs = [], ys = [];
+      for (let i = 0; i <= 720; i++) { const ph = 2 * Math.PI * i / 720, g = Math.sqrt((1 - Math.sin(ph) * Math.cos(ph)) / 3), den = g + alpha * (Math.cos(ph) + Math.sin(ph));
+        if (den > 0.05) { const R = k / den; xs.push(R * Math.cos(ph)); ys.push(R * Math.sin(ph)); } else { xs.push(null); ys.push(null); } }
+      traces.push({x: xs, y: ys, mode: 'lines', line: {color: ORANGE, width: 3}, name: `Drucker-Prager, η = ${eta}`}); lim = 3.2 * c;
+    }
+    layout = {xaxis: {title: 'σ₁', range: [-lim, lim], zeroline: true, ...tickHide}, yaxis: {title: 'σ₂', range: [-lim, lim], scaleanchor: 'x', zeroline: true, ...tickHide},
+              margin: {l: 50, r: 20, t: 30, b: 50}, legend: {orientation: 'h', y: -0.12, x: 0}, title: {text: 'Plane stress (σ₃ = 0)', font: {size: 14}}};
+  } else {
+    const r = crit === 'drucker' ? 1.6 * c : 1.45 * rhoMises(sy);
+    for (let k = 0; k < 3; k++) { const a = 2 * Math.PI * k / 3;
+      traces.push({x: [0, r * Math.cos(a)], y: [0, r * Math.sin(a)], mode: 'lines+text', line: {color: '#555', width: 1.5}, text: ['', ['σ₁', 'σ₂', 'σ₃'][k]], textposition: 'top center', textfont: {size: 16}, showlegend: false, hoverinfo: 'none'}); }
+    const polar = (rhoFn, color, name, dash) => { const xs = [], ys = []; for (let i = 0; i <= 720; i++) { const th = 2 * Math.PI * i / 720, rho = rhoFn(th); xs.push(rho * Math.cos(th)); ys.push(rho * Math.sin(th)); }
+      return {x: xs, y: ys, mode: 'lines', line: {color, width: 3, dash: dash || 'solid'}, name}; };
+    if (crit === 'tresca' || crit === 'both') traces.push(polar(th => rhoTresca(th, sy), GREEN, 'Tresca hexagon'));
+    if (crit === 'mises' || crit === 'both') traces.push(polar(() => rhoMises(sy), BLUE, 'von Mises circle, ρ = √(2/3) σy'));
+    if (crit === 'drucker') for (const [xi, dash] of [[0, 'solid'], [-c, 'dash'], [-2 * c, 'dot']]) traces.push(polar(() => rhoDrucker(xi, eta, c), ORANGE, `Drucker-Prager, ξ = ${xi}`, dash));
+    layout = {xaxis: {visible: false, range: [-1.3 * r, 1.3 * r]}, yaxis: {visible: false, range: [-1.3 * r, 1.3 * r], scaleanchor: 'x'},
+              margin: {l: 10, r: 10, t: 30, b: 40}, legend: {orientation: 'h', y: -0.05, x: 0}, title: {text: 'π-plane: the projected σ₁, σ₂, σ₃ axes are 120° apart', font: {size: 14}}};
+  }
+  Plotly.react('plot', traces, layout, {responsive: true, displaylogo: false});
+}
+document.querySelectorAll('input').forEach(el => el.addEventListener('input', draw));
+draw();
+</script>
+</body>
+</html>
